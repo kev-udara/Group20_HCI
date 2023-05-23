@@ -168,11 +168,9 @@ public class ShapeApp extends JFrame {
     private void scaleShape(String shapeName) {
         Shape shape = shapeMap.get(shapeName);
         if (shape != null) {
-            // Get the scale factor from the user
             String scaleInput = JOptionPane.showInputDialog(this, "Enter the scale factor:");
             double scaleFactor = Double.parseDouble(scaleInput);
 
-            // Scale the shape's dimensions
             String[] parts = shape.dimensions.split(",");
             for (int i = 0; i < parts.length; i++) {
                 int dimension = Integer.parseInt(parts[i].trim());
@@ -181,7 +179,6 @@ public class ShapeApp extends JFrame {
             }
             shape.dimensions = String.join(",", parts);
 
-            // Update the shape's properties based on the new dimensions
             if (shape instanceof CustomRectangle) {
                 CustomRectangle rectangle = (CustomRectangle) shape;
                 rectangle.width = Integer.parseInt(parts[0]);
@@ -213,7 +210,6 @@ public class ShapeApp extends JFrame {
                 }
             }
 
-            // Clear the canvas and redraw all shapes
             Graphics g = canvas.getGraphics();
             g.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
             for (Shape s : shapeMap.values()) {
@@ -259,11 +255,40 @@ public class ShapeApp extends JFrame {
     private void saveShape(String shapeName) {
         Shape shape = shapeMap.get(shapeName);
         if (shape != null) {
-            shape.save();
+            System.out.println("Shape saved: " + shapeName);
+
+            JOptionPane.showMessageDialog(this, "Shape saved successfully!", "Save Shape", JOptionPane.INFORMATION_MESSAGE);
+
+            shapeNameField.setText("");
+            dimensionField.setText("");
+            canvas.repaint();
+
+            showSavedShapes();
         } else {
             System.out.println("Shape not found: " + shapeName);
         }
     }
+
+    private void showSavedShapes() {
+
+        JFrame savedShapesFrame = new JFrame("Saved Shapes");
+        savedShapesFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        savedShapesFrame.setPreferredSize(new Dimension(600, 400));
+
+        JPanel savedShapesPanel = new JPanel();
+        savedShapesPanel.setLayout(new BoxLayout(savedShapesPanel, BoxLayout.Y_AXIS));
+
+        for (String shapeName : shapeMap.keySet()) {
+            JLabel shapeLabel = new JLabel(shapeName);
+            savedShapesPanel.add(shapeLabel);
+        }
+
+        savedShapesFrame.add(savedShapesPanel, BorderLayout.CENTER);
+
+        savedShapesFrame.pack();
+        savedShapesFrame.setVisible(true);
+    }
+
 
     private void editShape(String shapeName) {
         Shape shape = shapeMap.get(shapeName);
@@ -277,26 +302,33 @@ public class ShapeApp extends JFrame {
     private void deleteShape(String shapeName) {
         Shape shape = shapeMap.get(shapeName);
         if (shape != null) {
-            shapeMap.remove(shapeName);
-            Graphics g = canvas.getGraphics();
-            g.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-            for (Shape s : shapeMap.values()) {
-                s.draw(g);
+            int option = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the shape?", "Delete Shape", JOptionPane.YES_NO_OPTION);
+            if (option == JOptionPane.YES_OPTION) {
+                shapeMap.remove(shapeName);
+                Graphics g = canvas.getGraphics();
+                g.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+                for (Shape s : shapeMap.values()) {
+                    s.draw(g);
+                }
             }
         } else {
             System.out.println("Shape not found: " + shapeName);
         }
     }
 
+
     private abstract static class Shape {
         protected String shapeName;
         protected String dimensions;
         protected Color color;
 
+        protected boolean shaded;
+
         public Shape(String shapeName, String dimensions) {
             this.shapeName = shapeName;
             this.dimensions = dimensions;
             this.color = Color.BLACK;
+            this.shaded = false;
         }
 
         public abstract void draw(Graphics g);
@@ -306,6 +338,7 @@ public class ShapeApp extends JFrame {
         }
 
         public void addShade() {
+            this.shaded = true;
             System.out.println("Adding shade to shape: " + shapeName);
         }
 
@@ -340,6 +373,9 @@ public class ShapeApp extends JFrame {
         public void draw(Graphics g) {
             g.setColor(color);
             g.drawRect(50, 50, width, height);
+            if (shaded) {
+                g.fillRect(50, 50, width, height);
+            }
         }
     }
 
@@ -355,6 +391,9 @@ public class ShapeApp extends JFrame {
         public void draw(Graphics g) {
             g.setColor(color);
             g.drawOval(150, 150, diameter, diameter);
+            if (shaded) {
+                g.fillOval(150, 150, diameter, diameter);
+            }
         }
     }
 
@@ -379,6 +418,9 @@ public class ShapeApp extends JFrame {
         public void draw(Graphics g) {
             g.setColor(color);
             g.drawPolygon(xPoints, yPoints, 3);
+            if (shaded) {
+                g.fillPolygon(xPoints, yPoints, 3);
+            }
         }
     }
 
@@ -399,6 +441,9 @@ public class ShapeApp extends JFrame {
         public void draw(Graphics g) {
             g.setColor(color);
             g.drawOval(100, 250, width, height);
+            if (shaded) {
+                g.fillOval(100, 250, width, height);
+            }
         }
     }
 
@@ -423,6 +468,9 @@ public class ShapeApp extends JFrame {
         public void draw(Graphics g) {
             g.setColor(color);
             g.drawPolygon(xPoints, yPoints, 5);
+            if (shaded) {
+                g.fillPolygon(xPoints, yPoints, 5);
+            }
         }
     }
 
@@ -447,6 +495,9 @@ public class ShapeApp extends JFrame {
         public void draw(Graphics g) {
             g.setColor(color);
             g.drawPolygon(xPoints, yPoints, 6);
+            if (shaded) {
+                g.fillPolygon(xPoints, yPoints, 6);
+            }
         }
     }
 
